@@ -114,7 +114,11 @@ async function enviarQuestao(api, row, config) {
   const altE = sanitizeStr(row['Alternativa E'] ?? row['Alernativa E']);
   const gabarito = sanitizeStr(row['Gabarito']).trim().toUpperCase();
 
-  const respostas = ['A','B','C','D','E'].map(letter => (gabarito === letter ? 1 : 0));
+  const correctIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(gabarito);
+  const respostas = correctIndex >= 0 ? [correctIndex] : [];
+  if (correctIndex === -1) {
+    console.log(`   • ⚠️ gabarito inválido: "${gabarito}"`);
+  }
 
   // mapeamentos
   const disciplina = sanitizeStr(row['Disciplina']); // courses
