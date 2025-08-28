@@ -148,9 +148,9 @@ async function enviarQuestao(api, row, config) {
     sugestaoLinhasDesenho: 0,
     // tags (autocomplete)
     courses: '',
-    'courses[]': disciplina ? [disciplina] : [],
+    'courses[]': disciplina ? [disciplina] : '',
     subjects: '',
-    'subjects[]': tema ? [tema] : []
+    'subjects[]': tema ? [tema] : ''
   };
 
   try {
