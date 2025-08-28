@@ -151,7 +151,18 @@ async function enviarQuestao(api, row, config) {
 
   try {
     const resp = await api.post('/p/requests/createUpdateQuestion.php', { form });
-    const data = await resp.json();
+    if (resp.status && resp.status() !== 200) {
+      console.log(`   • ⚠️ HTTP status ${resp.status()}`);
+    }
+
+    const body = await resp.text();
+    let data;
+    try {
+      data = JSON.parse(body);
+    } catch (e) {
+      console.log(`   • ❌ resposta não JSON: ${body}`);
+      return { ok: false, code: 'PARSE', msg: 'Resposta inválida do servidor' };
+    }
 
     if (data?.success) {
       const eid = data?.question?.eid || '?';
