@@ -119,34 +119,32 @@ async function enviarQuestao(api, row, config) {
   const banca      = sanitizeStr(row['Banca']);      // autor
   const ano        = sanitizeStr(row['Ano']);        // ano
 
-  const form = new URLSearchParams();
-  form.append('id', '0');
-  form.append('idPai', '0');
-  form.append('tipo', '2'); // Multiple-Choice
-  form.append('acesso', String(config.acesso));      // 1=Public, 2=Private
-  form.append('autor', banca);
-  form.append('ano', ano);
-  form.append('idioma', String(config.idioma));      // 0=Português, 1=English, ...
-  form.append('level', String(config.level));        // 1..4
-  form.append('problema', problemaHTML);
-
-  // alternativas
-  form.append('alternativas[0]', altA);
-  form.append('alternativas[1]', altB);
-  form.append('alternativas[2]', altC);
-  form.append('alternativas[3]', altD);
-  form.append('alternativas[4]', altE);
-  for (const r of respostas) form.append('respostas[]', String(r));
-
-  // linhas sugeridas (para discursiva) — manter 0
-  form.append('sugestaoLinhasTexto', '0');
-  form.append('sugestaoLinhasDesenho', '0');
-
-  // tags (autocomplete)
-  form.append('courses', '');
-  if (disciplina) form.append('courses[]', disciplina);
-  form.append('subjects', '');
-  if (tema) form.append('subjects[]', tema);
+  const form = {
+    id: 0,
+    idPai: 0,
+    tipo: 2, // Multiple-Choice
+    acesso: config.acesso,
+    autor: banca,
+    ano: ano,
+    idioma: config.idioma,
+    level: config.level,
+    problema: problemaHTML,
+    // alternativas
+    'alternativas[0]': altA,
+    'alternativas[1]': altB,
+    'alternativas[2]': altC,
+    'alternativas[3]': altD,
+    'alternativas[4]': altE,
+    'respostas[]': respostas,
+    // linhas sugeridas (para discursiva) — manter 0
+    sugestaoLinhasTexto: 0,
+    sugestaoLinhasDesenho: 0,
+    // tags (autocomplete)
+    courses: '',
+    'courses[]': disciplina ? [disciplina] : '',
+    subjects: '',
+    'subjects[]': tema ? [tema] : ''
+  };
 
   try {
     const resp = await api.post('/p/requests/createUpdateQuestion.php', {
