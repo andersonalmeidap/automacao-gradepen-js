@@ -5,13 +5,14 @@
 const path = require('path');
 const XLSX = require('xlsx');
 const { chromium, request } = require('playwright');
+require('dotenv').config();
 
 // ========= CONFIG =========
 const EXCEL_PATH = path.resolve(__dirname, '../data/teste_grade_pen.xlsx');
 
-// Credenciais (pode mover para .env se quiser)
-const EMAIL = 'anderson.almeidap@outlook.com';
-const SENHA = 'Cad09025.';
+// Credenciais
+const EMAIL = process.env.EMAIL;
+const SENHA = process.env.SENHA;
 
 // Acesso/idioma/nível padrão para as questões
 const QUESTION_CONFIG = {
