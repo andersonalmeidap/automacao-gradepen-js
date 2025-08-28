@@ -17,10 +17,10 @@ const SENHA = 'Cad09025.';
 const QUESTION_CONFIG = {
   acesso: 2,          // 1=Public, 2=Private
   idioma: 1,          // 0=Português, 1=English, 2=Español, 3=Arabic
-  level: 1            // 1=Elementary, 2=High school, 3=Technical, 4=College/University
+  level: 4            // 1=Elementary, 2=High school, 3=Technical, 4=College/University
 };
 
-const { insertQuestions } = require('./inserirQuestoesTeste');
+const { insertQuestions } = require('./inserirQuestoes');
 
 (async () => {
   // 1) Ler a planilha (primeira aba)
