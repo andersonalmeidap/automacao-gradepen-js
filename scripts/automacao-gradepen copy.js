@@ -6,12 +6,13 @@ const { chromium } = require('playwright');
 const XLSX = require('xlsx');
 const path = require('path');
 const { insertQuestions } = require('./inserirQuestoes');
+require('dotenv').config();
 
 (async () => {
   // === CONFIGURAÇÕES ===
   const EXCEL_PATH = path.resolve(__dirname, '../data/teste_grade_pen.xlsx');
-  const EMAIL      = 'anderson.almeidap@outlook.com';
-  const SENHA      = 'Cad09025.';
+  const EMAIL      = process.env.EMAIL;
+  const SENHA      = process.env.SENHA;
 
   // 1) Ler planilha de questões
   const workbook = XLSX.readFile(EXCEL_PATH);
