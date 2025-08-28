@@ -20,7 +20,7 @@ const QUESTION_CONFIG = {
   level: 1            // 1=Elementary, 2=High school, 3=Technical, 4=College/University
 };
 
-const { insertQuestions } = require('./inserirQuestoesTeste');
+const { insertQuestions } = require('./automation/insertQuestionsWithImages');
 
 (async () => {
   // 1) Ler a planilha (primeira aba)
