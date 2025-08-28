@@ -135,7 +135,6 @@ async function enviarQuestao(api, row, config) {
     'alternativas[2]': altC,
     'alternativas[3]': altD,
     'alternativas[4]': altE,
-    'respostas[]': respostas,
     // linhas sugeridas (para discursiva) — manter 0
     sugestaoLinhasTexto: 0,
     sugestaoLinhasDesenho: 0,
@@ -145,6 +144,10 @@ async function enviarQuestao(api, row, config) {
     subjects: '',
     'subjects[]': tema ? [tema] : []
   };
+
+  for (let i = 0; i < respostas.length; i++) {
+    form[`respostas[${i}]`] = respostas[i];
+  }
 
   try {
     const resp = await api.post('/p/requests/createUpdateQuestion.php', { form });
