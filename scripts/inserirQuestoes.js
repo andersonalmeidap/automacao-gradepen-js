@@ -113,8 +113,16 @@ async function enviarQuestao(api, row, config) {
   const altD = sanitizeStr(row['Alternativa D'] ?? row['Alernativa D']);
   const altE = sanitizeStr(row['Alternativa E'] ?? row['Alernativa E']);
   const gabarito = sanitizeStr(row['Gabarito']).trim().toUpperCase();
+  const correctIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(gabarito);
 
-  const respostas = ['A','B','C','D','E'].map(letter => (gabarito === letter ? 1 : 0));
+  if (correctIndex === -1) {
+    const linha = typeof row.__rowNum__ === 'number' ? row.__rowNum__ + 1 : '?';
+    console.log(`   • ❌ gabarito inválido (linha ${linha})`);
+    return { ok: false, code: 'GAB', msg: 'Gabarito inválido' };
+  }
+
+  const respostas = [0, 0, 0, 0, 0];
+  respostas[correctIndex] = 1;
 
   // mapeamentos
   const disciplina = sanitizeStr(row['Disciplina']); // courses
