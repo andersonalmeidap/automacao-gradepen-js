@@ -104,11 +104,14 @@ async function enviarQuestao(api, row, config) {
   }
 
   // alternativas
-  const altA = sanitizeStr(row['Alternativa A']);
-  const altB = sanitizeStr(row['Alternativa B']);
-  const altC = sanitizeStr(row['Alternativa C']);
-  const altD = sanitizeStr(row['Alternativa D']);
-  const altE = sanitizeStr(row['Alternativa E']);
+  // Algumas planilhas podem conter um erro de digitação no cabeçalho das
+  // alternativas ("Alernativa" em vez de "Alternativa"). Para não falhar na
+  // inserção das questões, aceitamos ambos os nomes de coluna.
+  const altA = sanitizeStr(row['Alternativa A'] ?? row['Alernativa A']);
+  const altB = sanitizeStr(row['Alternativa B'] ?? row['Alernativa B']);
+  const altC = sanitizeStr(row['Alternativa C'] ?? row['Alernativa C']);
+  const altD = sanitizeStr(row['Alternativa D'] ?? row['Alernativa D']);
+  const altE = sanitizeStr(row['Alternativa E'] ?? row['Alernativa E']);
   const gabarito = sanitizeStr(row['Gabarito']).trim().toUpperCase();
 
   const respostas = ['A','B','C','D','E'].map(letter => (gabarito === letter ? 1 : 0));
