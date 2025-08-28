@@ -117,7 +117,7 @@ async function enviarQuestao(api, row, config) {
 
   if (correctIndex === -1) {
     const linha = typeof row.__rowNum__ === 'number' ? row.__rowNum__ + 1 : '?';
-    console.log(`   • ❌ gabarito inválido (linha ${linha})`);
+    console.log(`   • ❌ gabarito inválido "${gabarito}" (linha ${linha})`);
     return { ok: false, code: 'GAB', msg: 'Gabarito inválido' };
   }
 
