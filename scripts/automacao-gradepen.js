@@ -30,7 +30,8 @@ const { insertQuestions } = require('./inserirQuestoes');
 
   // 2) Abrir navegador e logar para obter cookies de sessão
   const browser = await chromium.launch({ headless: false });
-  const page = await browser.newPage();
+  const context = await browser.newContext();
+  const page = await context.newPage();
 
   console.log(`🔐 Fazendo login como ${EMAIL}...`);
   await page.goto('https://www.gradepen.com/p/index.php');
@@ -44,25 +45,15 @@ const { insertQuestions } = require('./inserirQuestoes');
   await page.waitForTimeout(3000);
   console.log('✅ Login bem-sucedido!');
 
-  // 3) Criar um API client com mesmos cookies (para os POSTs diretos)
-  const cookies = await page.context().cookies();
+  // 3) Criar um API client com o mesmo estado de armazenamento da sessão
   const apiRequest = await request.newContext({
     baseURL: 'https://www.gradepen.com',
     extraHTTPHeaders: {
-      'Accept': '*/*',
-      'Referer': 'https://www.gradepen.com/p/avaliacoes.php',
-      'Origin': 'https://www.gradepen.com'
+      Accept: '*/*',
+      Referer: 'https://www.gradepen.com/p/avaliacoes.php',
+      Origin: 'https://www.gradepen.com'
     },
-    // injeta cookies de sessão
-    cookies: cookies.map(c => ({
-      name: c.name,
-      value: c.value,
-      domain: c.domain.startsWith('.') ? c.domain.slice(1) : c.domain,
-      path: c.path || '/',
-      httpOnly: c.httpOnly,
-      secure: c.secure,
-      sameSite: c.sameSite
-    }))
+    storageState: await context.storageState()
   });
 
   // 4) Inserir as questões a partir da planilha
