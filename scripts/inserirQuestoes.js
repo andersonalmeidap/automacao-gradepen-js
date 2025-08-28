@@ -151,11 +151,13 @@ async function enviarQuestao(api, row, config) {
 
   try {
     const resp = await api.post('/p/requests/createUpdateQuestion.php', { form });
-    if (resp.status && resp.status() !== 200) {
-      console.log(`   • ⚠️ HTTP status ${resp.status()}`);
+    const statusCode = resp.status ? resp.status() : undefined;
+    const body = await resp.text();
+    if (statusCode !== undefined && statusCode !== 200) {
+      console.log(`   • ⚠️ HTTP status ${statusCode}`);
+      console.log(`   • ⚠️ corpo completo:\n${body}`);
     }
 
-    const body = await resp.text();
     let data;
     try {
       data = JSON.parse(body);
