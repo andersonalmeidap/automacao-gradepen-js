@@ -1,4 +1,4 @@
-// scripts/inserirQuestoes.js
+// scripts/inserirQuestoesTeste.js
 // Lê as colunas exatas da planilha e envia as questões por POST.
 // Mapeamentos (planilha → GradePen):
 // - Disciplina  -> courses[]       (Courses)
@@ -26,7 +26,7 @@ function textoUtilLen(html) {
 
 function sanitizeStr(v) {
   if (v === undefined || v === null) return '';
-  return String(v).toString();
+  return String(v);
 }
 
 /**
@@ -53,8 +53,8 @@ async function uploadImagesIfAny(api, imagesCell) {
       };
       const resp = await api.post('/p/requests/uploadImage.php', { multipart: formData });
       const text = (await resp.text() || '').trim();
-      // a resposta costuma ser o ID numérico da imagem
-      const imgId = text.match(/\d+/) ? text.match(/\d+/)[0] : null;
+      const match = text.match(/\d+/);
+      const imgId = match ? match[0] : null;
       if (imgId) {
         resultIds.push(imgId);
         console.log(`   • 🖼️ upload ok: ${path.basename(abs)} → imgId=${imgId}`);
@@ -79,9 +79,7 @@ function guessMime(filePath) {
 /** Monta o HTML do enunciado com as imagens anexadas (se houver) */
 function montarProblemaHTML(enunciadoTexto, imageIds) {
   let html = sanitizeStr(enunciadoTexto).trim();
-  // se vier texto puro, ok; se vier vazio e tiver imagem, ainda passa na validação porque <img> conta
   for (const id of imageIds) {
-    // markup mínimo aceito no payload (gpimg-id é o que o site usa)
     html += (html ? '<br>' : '') + `<img gpimg-id="${id}">`;
   }
   return html;
@@ -89,7 +87,6 @@ function montarProblemaHTML(enunciadoTexto, imageIds) {
 
 // ===== Envia 1 questão pelo endpoint oficial =====
 async function enviarQuestao(api, row, config) {
-  // planilha: Enunciado
   const enunciadoTexto = sanitizeStr(row['Enunciado']);
 
   // imagens opcionais
@@ -98,29 +95,23 @@ async function enviarQuestao(api, row, config) {
 
   const problemaHTML = montarProblemaHTML(enunciadoTexto, imgIds);
 
-  // validação local para evitar code=38
+  // validação local para evitar code=38 (enunciado inválido)
   if (textoUtilLen(problemaHTML) < 5) {
     console.log('   • ⚠️ enunciado muito curto/vazio (menos de 5 chars úteis).');
   }
 
-  // alternativas
-  // Algumas planilhas podem conter um erro de digitação no cabeçalho das
-  // alternativas ("Alernativa" em vez de "Alternativa"). Para não falhar na
-  // inserção das questões, aceitamos ambos os nomes de coluna.
+  // alternativas (aceita “Alternativa” e “Alernativa” por segurança)
   const altA = sanitizeStr(row['Alternativa A'] ?? row['Alernativa A']);
   const altB = sanitizeStr(row['Alternativa B'] ?? row['Alernativa B']);
   const altC = sanitizeStr(row['Alternativa C'] ?? row['Alernativa C']);
   const altD = sanitizeStr(row['Alternativa D'] ?? row['Alernativa D']);
   const altE = sanitizeStr(row['Alternativa E'] ?? row['Alernativa E']);
   const gabarito = sanitizeStr(row['Gabarito']).trim().toUpperCase();
-  
+
   const correctIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(gabarito);
   const respostas = Array(5).fill('0');
-  if (correctIndex >= 0) {
-    respostas[correctIndex] = '1';
-  } else {
-    console.log(`   • ⚠️ gabarito inválido: "${gabarito}"`);
-  }
+  if (correctIndex >= 0) respostas[correctIndex] = '1';
+  else console.log(`   • ⚠️ gabarito inválido: "${gabarito}"`);
 
   // mapeamentos
   const disciplina = sanitizeStr(row['Disciplina']); // courses
@@ -132,22 +123,25 @@ async function enviarQuestao(api, row, config) {
   form.append('id', '0');
   form.append('idPai', '0');
   form.append('tipo', '2'); // Multiple-Choice
-  form.append('acesso', String(config.acesso));
+  form.append('acesso', String(config.acesso));      // 1=Public, 2=Private
   form.append('autor', banca);
   form.append('ano', ano);
-  form.append('idioma', String(config.idioma));
-  form.append('level', String(config.level));
+  form.append('idioma', String(config.idioma));      // 0=Português, 1=English, ...
+  form.append('level', String(config.level));        // 1..4
   form.append('problema', problemaHTML);
+
   // alternativas
   form.append('alternativas[0]', altA);
   form.append('alternativas[1]', altB);
   form.append('alternativas[2]', altC);
   form.append('alternativas[3]', altD);
   form.append('alternativas[4]', altE);
-  respostas.forEach(r => form.append('respostas[]', r));
+  for (const r of respostas) form.append('respostas[]', String(r));
+
   // linhas sugeridas (para discursiva) — manter 0
   form.append('sugestaoLinhasTexto', '0');
   form.append('sugestaoLinhasDesenho', '0');
+
   // tags (autocomplete)
   form.append('courses', '');
   if (disciplina) form.append('courses[]', disciplina);
@@ -155,9 +149,13 @@ async function enviarQuestao(api, row, config) {
   if (tema) form.append('subjects[]', tema);
 
   try {
-    const resp = await api.post('/p/requests/createUpdateQuestion.php', { form });
+    const resp = await api.post('/p/requests/createUpdateQuestion.php', {
+      data: form.toString(),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
     const statusCode = resp.status ? resp.status() : undefined;
     const body = await resp.text();
+
     if (statusCode !== undefined && statusCode !== 200) {
       console.log(`   • ⚠️ HTTP status ${statusCode}`);
       console.log(`   • ⚠️ corpo completo:\n${body}`);
@@ -166,7 +164,7 @@ async function enviarQuestao(api, row, config) {
     let data;
     try {
       data = JSON.parse(body);
-    } catch (e) {
+    } catch {
       console.log(`   • ❌ resposta não JSON: ${body}`);
       return { ok: false, code: 'PARSE', msg: 'Resposta inválida do servidor' };
     }
