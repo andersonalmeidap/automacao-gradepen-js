@@ -1,4 +1,4 @@
-// scripts/inserirQuestoesTeste.js
+// insertQuestionsWithImages.js
 // Lê as colunas exatas da planilha e envia as questões por POST.
 // Mapeamentos (planilha → GradePen):
 // - Disciplina  -> courses[]       (Courses)
@@ -40,7 +40,7 @@ async function uploadImagesIfAny(api, imagesCell) {
   // separa por ; , | ou quebra de linha
   const parts = String(imagesCell).split(/[,;|\n]+/).map(s => s.trim()).filter(Boolean);
   for (const rel of parts) {
-    const abs = path.isAbsolute(rel) ? rel : path.resolve(__dirname, '..', 'data', rel);
+    const abs = path.isAbsolute(rel) ? rel : path.resolve(__dirname, '..', '..', 'data', rel);
     if (!fs.existsSync(abs)) {
       console.log(`   • ⚠️ imagem ignorada (arquivo não encontrado): ${rel}`);
       continue;

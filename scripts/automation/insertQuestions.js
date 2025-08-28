@@ -1,4 +1,4 @@
-// inserirQuestoes.js
+// insertQuestions.js
 const { URLSearchParams } = require('url');
 
 async function insertQuestions(apiRequest, rows) {

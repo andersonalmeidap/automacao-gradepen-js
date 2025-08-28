@@ -1,11 +1,11 @@
 // automacao-gradepen.js
 // Script principal que faz login, lê planilha e dispara inserção de questões
-// Depende de inserirQuestoes.js para o loop de inserção
+// Depende de insertQuestions.js para o loop de inserção
 
 const { chromium } = require('playwright');
 const XLSX = require('xlsx');
 const path = require('path');
-const { insertQuestions } = require('./inserirQuestoes');
+const { insertQuestions } = require('./automation/insertQuestions');
 
 (async () => {
   // === CONFIGURAÇÕES ===
